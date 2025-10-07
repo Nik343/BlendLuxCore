@@ -448,7 +448,7 @@ class Exporter(object):
         config_settings = scene.luxcore.config
         path_settings = config_settings.path
 
-        if render_engine == "BIDIRCPU":
+        if render_engine in {"BIDIRCPU", "BIDIRCUDA"}:
             path_depths = (
                 config_settings.bidir_path_maxdepth,
                 config_settings.bidir_light_maxdepth,
@@ -468,4 +468,4 @@ class Exporter(object):
             stats.clamping.value = 0
         
         stats.use_hybridbackforward.value = (config_props.Get("path.hybridbackforward.enable", [False]).GetBool()
-                                             and render_engine != "BIDIRCPU")
+                                             and render_engine not in {"BIDIRCPU", "BIDIRCUDA"})

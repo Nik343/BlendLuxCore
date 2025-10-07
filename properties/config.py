@@ -402,6 +402,17 @@ class LuxCoreConfigImageResizePolicy(PropertyGroup):
         return utils.luxutils.create_props(prefix, definitions)
 
 
+
+
+def _config_bidir_device_items(self, context):
+    items = [
+        ("CPU", "CPU", "Use the CPU for bidirectional path tracing", 0)
+    ]
+    if utils.luxutils.is_cuda_build() and utils.luxutils.is_bidir_cuda_supported():
+        items.append(("CUDA", "CUDA", "Use CUDA GPUs for bidirectional path tracing", len(items)))
+    return items
+
+
 class LuxCoreConfig(PropertyGroup):
     """
     Main config storage class.
@@ -489,9 +500,13 @@ class LuxCoreConfig(PropertyGroup):
                        "You can enable/disable each device in the Devices panel below", 1),
     ]
     device: EnumProperty(name="Device", items=devices, default="CPU")
-    # A trick so we can show the user that bidir can only be used on the CPU (see UI code)
-    bidir_device: EnumProperty(name="Device", items=devices, default="CPU",
-                               description="Bidir is only available on CPU. Switch to the Path engine if you want to render on the GPU")
+
+    bidir_device: EnumProperty(
+        name="Device",
+        items=_config_bidir_device_items,
+        default="CPU",
+        description="Select the compute device for bidirectional path tracing. CUDA requires a LuxCore build with GPU BDPT support."
+    )
 
     use_tiles: BoolProperty(name="Use Tiled Path (slower)", default=False, description=TILED_DESCRIPTION)
     

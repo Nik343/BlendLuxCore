@@ -222,7 +222,10 @@ def convert_viewport_engine(context, scene, definitions, config):
     )
 
     if utils.using_bidir_in_viewport(scene):
-        luxcore_engine = "BIDIRCPU"
+        if config.bidir_device == "CUDA" and utils.luxutils.is_bidir_cuda_supported():
+            luxcore_engine = "BIDIRCUDA"
+        else:
+            luxcore_engine = "BIDIRCPU"
         definitions["light.maxdepth"] = config.bidir_light_maxdepth
         definitions["path.maxdepth"] = config.bidir_path_maxdepth
         sampler = config.sampler
@@ -318,7 +321,10 @@ def _convert_final_engine(scene, definitions, config):
             _convert_opencl_settings(scene, definitions, True)
     else:
         # config.engine == BIDIR
-        luxcore_engine = "BIDIRCPU"
+        if config.bidir_device == "CUDA" and utils.luxutils.is_bidir_cuda_supported():
+            luxcore_engine = "BIDIRCUDA"
+        else:
+            luxcore_engine = "BIDIRCPU"
         definitions["light.maxdepth"] = config.bidir_light_maxdepth
         definitions["path.maxdepth"] = config.bidir_path_maxdepth
 

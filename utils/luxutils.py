@@ -1,6 +1,8 @@
 """Various utilities requiring pyluxcore."""
 
 import pyluxcore
+from functools import lru_cache
+
 
 
 def create_props(prefix, definitions):
@@ -49,3 +51,49 @@ def is_cuda_build():
         .Get("compile.LUXRAYS_ENABLE_CUDA")
         .GetBool()
     )
+
+@lru_cache(maxsize=None)
+def _get_render_engine_names():
+    names = set()
+    getters = (
+        getattr(pyluxcore, "GetRenderEnginePluginNames", None),
+        getattr(pyluxcore, "GetRenderEngineNames", None),
+    )
+    for getter in getters:
+        if getter is None:
+            continue
+        try:
+            result = getter()
+        except Exception:
+            continue
+        names.update(_normalize_engine_names(result))
+
+    registry_entry = getattr(pyluxcore, "RenderEngineRegistry", None)
+    if registry_entry is not None:
+        try:
+            registry = registry_entry() if callable(registry_entry) else registry_entry
+            get_names = getattr(registry, "GetNames", None)
+            if callable(get_names):
+                names.update(_normalize_engine_names(get_names()))
+        except Exception:
+            pass
+
+    return tuple(sorted(names))
+
+
+def _normalize_engine_names(raw):
+    if isinstance(raw, str):
+        return {raw.upper()}
+    try:
+        iterator = iter(raw)
+    except TypeError:
+        return {str(raw).upper()}
+    return {str(name).upper() for name in iterator}
+
+
+def is_bidir_cuda_supported():
+    if not is_cuda_build():
+        return False
+    return "BIDIRCUDA" in _get_render_engine_names()
+
+

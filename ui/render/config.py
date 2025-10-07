@@ -35,8 +35,14 @@ def luxcore_render_draw(panel, context):
                     icon=icons.ERROR,
                 )
     else:
-        col_device.enabled = False
-        col_device.prop(config, "bidir_device", text="Device")
+        supports_bidir_cuda = utils.luxutils.is_bidir_cuda_supported()
+        col_device.enabled = supports_bidir_cuda
+        col_device.prop(config, "bidir_device", text="Compute device", icon="MEMORY")
+        if not supports_bidir_cuda:
+            col_device.label(
+                text="GPU Bidir requires LuxCore with CUDA BDPT support",
+                icon=icons.INFO,
+            )
 
     # Engine
     col = layout.column(align=True)

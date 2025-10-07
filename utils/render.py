@@ -22,6 +22,7 @@ ENGINE_TO_STR = {
     "TILEPATHCPU": "Tile Path CPU",
     "TILEPATHOCL": "Tile Path GPU",
     "BIDIRCPU": "Bidir CPU",
+    "BIDIRCUDA": "Bidir CUDA",
     "BIDIRVMCPU": "BidirVM CPU",
     "RTPATHOCL": "RT Path GPU",
     "RTPATHCPU": "RT Path CPU",
@@ -194,7 +195,7 @@ def get_pretty_stats(config, stats, scene, context=None):
 
         # Extra info about the amount of light traced samples.
         # In Bidir engines, the eye samples already include the light traced samples, so this is not needed.
-        if samples_light > 0 and engine not in {"BIDIRCPU", "BIDIRVMCPU"}:
+        if samples_light > 0 and engine not in {"BIDIRCPU", "BIDIRCUDA", "BIDIRVMCPU"}:
             if halt.use_samples and only_lighttracing:
                 samples_msg += f" (+ {samples_light}/{halt.samples} Light Tracing)"
             elif halt.use_light_samples and using_hybridbackforward:
